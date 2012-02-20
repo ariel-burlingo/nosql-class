@@ -24,7 +24,7 @@ for(p in flickr.photos.photo) {
   // save the url to the flickr image: s – small, m – medium, b – big
   // http://farm{farm-id}.static.flickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
 
-  photo.image_url_small = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret+"_m.jpg";
+  photo.image_url_medium = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret+"_m.jpg";
 
   db.save(photo.id, photo, function(er, ok) {
     if (er) {
