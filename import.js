@@ -10,26 +10,43 @@ var cradle = require("cradle")
 var connection = new(cradle.Connection)("localhost", 5984);
 var db = connection.database('tatry');
 
-data = fs.readFileSync("flickr_search.json", "utf-8");
+var couchimport = function(filename) {
+  var data = fs.readFileSync(filename, "utf-8");
+  var flickr = JSON.parse(data);
 
-flickr = JSON.parse(data);
+  var counter = 0;
 
-for(p in flickr.photos.photo) {
-  photo = flickr.photos.photo[p];
+  for (var p in flickr.photos.photo) {
+    photo = flickr.photos.photo[p];
 
-  photo.geometry = {"type": "Point", "coordinates": [photo.longitude, photo.latitude]};
+    var longitude = photo.longitude;
+    var latitude  = photo.latitude;
 
-  console.log("[lng, lat] = ", photo.longitude, photo.latitude)
+    if (longitude && latitude && longitude != 0 && latitude != 0) {
+      // console.log("[lng, lat] = ", photo.longitude, photo.latitude)
 
-  // save the url to the flickr image: s – small, m – medium, b – big
-  // http://farm{farm-id}.static.flickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+      photo.geometry = {"type": "Point", "coordinates": [longitude, latitude]};
 
-  photo.image_url_medium = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret+"_m.jpg";
+      // save the url to the flickr image: s – small, m – medium, b – big
+      // http://farm{farm-id}.static.flickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+      photo.image_url_medium = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret+"_m.jpg";
 
-  db.save(photo.id, photo, function(er, ok) {
-    if (er) {
-      util.puts("Error: " + er);
-      return;
+      counter++;
+
+      db.save(photo.id, photo, function(er, ok) {
+        if (er) {
+          util.puts("Error: " + er);
+          return;
+        }
+      });
     }
-  });
-}
+  }
+  return counter;
+};
+
+var filenames =  ["flickr_search-01.json", "flickr_search-02.json", "flickr_search-03.json", "flickr_search-04.json"]
+
+filenames.forEach(function (name) {
+  var n = couchimport(name);
+  console.log("imported data from:", name, "(#" + n + ")");
+});
