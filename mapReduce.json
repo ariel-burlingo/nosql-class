@@ -1,0 +1,16 @@
+{
+  "language": "javascript",
+  "views":
+  {
+    "all": {
+      "map": "function(doc){emit(doc.cycle, parseInt(doc.Cost));};",
+      "reduce": "function(key, values){return sum(values);}"
+    },
+
+    "suma": {
+      "map": "function(doc){if(doc.Cost != "")emit(1, parseInt(doc.Cost));};",
+      "reduce": "_sum"
+    }
+  }
+}
+
